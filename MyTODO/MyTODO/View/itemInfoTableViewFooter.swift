@@ -7,7 +7,7 @@
 
 import UIKit
 
-class addNewItemTableViewFooter: UITableViewHeaderFooterView {
+class itemInfoTableViewFooter: UITableViewHeaderFooterView {
 
     /*
     // Only override draw() if you perform custom drawing.
@@ -38,7 +38,7 @@ class addNewItemTableViewFooter: UITableViewHeaderFooterView {
     }
     
     //MARK: setupUI
-    func _setupUI() {
+    private func _setupUI() {
         self._setupConstraits()
         self.descriptionTextView.backgroundColor = UIColor.darkGray
         self.descriptionTextView.textAlignment = .left
@@ -46,7 +46,7 @@ class addNewItemTableViewFooter: UITableViewHeaderFooterView {
         self.descriptionTextView.layer.masksToBounds = true
     }
     
-    func _setupConstraits() {
+    private func _setupConstraits() {
         self.descriptionTextView.autoresizesSubviews = false
         self.descriptionTextView.translatesAutoresizingMaskIntoConstraints = false
         self.descriptionTextView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true

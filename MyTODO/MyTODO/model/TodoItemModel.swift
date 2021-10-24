@@ -12,7 +12,6 @@ class TodoItemModel: NSObject {
     var date : Date?
     var check : Bool?
     var itemDescription : String?
-    var editFlag:Bool = false
 
     override init() {
         super.init()

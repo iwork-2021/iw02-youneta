@@ -16,7 +16,7 @@ enum addNewItemTableViewCellType {
 
 typealias voidBlk = () -> ()
 
-class addNewItemTableViewCell: UITableViewCell {
+class itemInfoTableViewCell: UITableViewCell {
     static let moreActionImageName : String = "moreAction"
     
     var didClickCellBlk : voidBlk?
@@ -31,13 +31,12 @@ class addNewItemTableViewCell: UITableViewCell {
     lazy var nameLabel : UILabel = UILabel()
     lazy var detailTextField : UITextField = {
         var textField = UITextField()
-        textField.placeholder = "在此输入"
         return textField
     }()
     lazy var switchButton : UISwitch = UISwitch()
     lazy var moreActionImageView : UIImageView = {
         var imageView = UIImageView()
-        imageView.image = UIImage.init(named: addNewItemTableViewCell.moreActionImageName)
+        imageView.image = UIImage.init(named: itemInfoTableViewCell.moreActionImageName)
         return imageView
     }()
     
@@ -72,25 +71,24 @@ class addNewItemTableViewCell: UITableViewCell {
             break
         case .cellTypeMoreAction:
             self.addSubview(self.moreActionImageView)
-            self.didClickCellBlk = { () -> () in
-                NSLog("hello")
-            }
             self.addGestureRecognizer(UITapGestureRecognizer.init(target: self, action: #selector(_handleTapGes)))
+            self.addSubview(self.detailTextField)
+            self.detailTextField.isEnabled = false
             break
         }
         self._setupUI()
     }
     
     @objc func _handleTapGes(sender: UITapGestureRecognizer) {
-        self.didClickCellBlk
+        self.didClickCellBlk!()
     }
     
     //MARK: setupUI
-    func _setupUI() {
+    private func _setupUI() {
         self._setupContraints()
     }
     
-    func _setupContraints() {
+    private func _setupContraints() {
         self.iconImageView.autoresizesSubviews = false
         self.iconImageView.translatesAutoresizingMaskIntoConstraints = false
         self.iconImageView.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.5).isActive = true
@@ -129,6 +127,13 @@ class addNewItemTableViewCell: UITableViewCell {
             self.moreActionImageView.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.5).isActive = true
             self.moreActionImageView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
             self.moreActionImageView.widthAnchor.constraint(equalTo: self.moreActionImageView.heightAnchor).isActive = true
+            
+            self.detailTextField.autoresizesSubviews = false
+            self.detailTextField.translatesAutoresizingMaskIntoConstraints = false
+            self.detailTextField.leftAnchor.constraint(equalTo: self.nameLabel.rightAnchor).isActive = true
+            self.detailTextField.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+            self.detailTextField.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+            self.detailTextField.rightAnchor.constraint(equalTo: self.moreActionImageView.leftAnchor).isActive = true
             break
         }
     }

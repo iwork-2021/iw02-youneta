@@ -16,25 +16,22 @@ class rootTableViewController : UITableViewController {
     override init(style: UITableView.Style) {
         super.init(style: style)
         self.title = "TODO List"
-        self.tableView.register(TodoItemTableViewCell.self, forCellReuseIdentifier: rootTableViewController.cellIdentifier)
+        self.tableView.register(todoItemsTableViewCell.self, forCellReuseIdentifier: rootTableViewController.cellIdentifier)
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
     
+    //MARK: life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        self._setupTableView()
         self._setupAddNewBtn()
     }
 
     //MARK: private methods
-    func _setupAddNewBtn() {
+    private func _setupAddNewBtn() {
         let addTodoBtn = UIButton.init(type: UIButton.ButtonType.custom)
         addTodoBtn.setTitle("Add", for: UIControl.State.normal)
         addTodoBtn.setTitleColor(UIColor.white, for: UIControl.State.normal)
@@ -42,27 +39,30 @@ class rootTableViewController : UITableViewController {
         self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(customView: addTodoBtn)
         self.view.backgroundColor = UIColor.black
     }
-
+    
     @objc func _handleClickAddTodoItem(sender: UIBarButtonItem) {
-        let newItemModel = TodoItemModel()
-        let addNewVC = addNewTodoViewController.init(model: newItemModel)
+        let addNewVC = addNewTodoViewController.init()
+        weak var weakSelf = self
+        addNewVC.completeBlk = {(model:TodoItemModel) -> () in
+            if model.itemName != ""{
+                weakSelf?._handleCompleteAddTodoItem(model: model)
+            }
+        }
         self.navigationController?.pushViewController(addNewVC, animated: true)
-//        self._handleAddTodoItem(model: newItemModel)
+        
     }
     
-    func _handleAddTodoItem(model: TodoItemModel) {
-        let newCell = TodoItemTableViewCell.init(style: UITableViewCell.CellStyle.default, reuseIdentifier: rootTableViewController.cellIdentifier)
-        var _indexPath = self.tableView.indexPathsForVisibleRows?.last
-        if(_indexPath == nil){
-            _indexPath = IndexPath.init(row: 0, section: 0)
-        }
-        else {
-            _indexPath?.row += 1
-        }
-        cellModelArray.insert(model, at: _indexPath!.row)
+    private func _handleCompleteAddTodoItem(model: TodoItemModel) {
+        let _indexPath = IndexPath.init(row: self.tableView.numberOfRows(inSection: 0), section: 0)
+        cellModelArray.insert(model, at: _indexPath.row)
         self.tableView.beginUpdates()
-        self.tableView.insertRows(at: [_indexPath!], with: UITableView.RowAnimation.left)
+        self.tableView.insertRows(at: [_indexPath], with: UITableView.RowAnimation.left)
         self.tableView.endUpdates()
+        self.tableView.reloadData()
+    }
+    
+    private func _setupTableView() {
+
     }
     
     // MARK: - Table view data source
@@ -74,64 +74,54 @@ class rootTableViewController : UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 0
-    }
-
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: rootTableViewController.cellIdentifier, for: indexPath)
-        
-        // Configure the cell...
-        
-        
-        return cell
+        return self.cellModelArray.count
     }
 
     
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let model: TodoItemModel = cellModelArray[indexPath.row] as! TodoItemModel
+        let cell = todoItemsTableViewCell.init(name: model.itemName!, check: model.check ?? false, style: .default, reuserIdentifier: rootTableViewController.cellIdentifier)
+        weak var weakSelf = self
+        cell.didTapInfoBlk = { (cell: todoItemsTableViewCell) -> () in
+            weakSelf?._showInfoForCell(cell: cell)
         }
+        cell.selectionStyle = .none
+        return cell
     }
-    */
 
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
+    // MARK: table view delegeate
+    override func tableView(_ tableView: UITableView, didHighlightRowAt indexPath: IndexPath) {
+        self.tableView.cellForRow(at: indexPath)?.backgroundColor = UIColor.darkGray
     }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
+    
+    override func tableView(_ tableView: UITableView, didUnhighlightRowAt indexPath: IndexPath) {
+        self.tableView.cellForRow(at: indexPath)?.backgroundColor = UIColor.clear
+    }
+    
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
     }
-    */
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    
+    override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+//        self.tableView.setEditing(true, animated: true)
+        return .delete
     }
-    */
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        self.cellModelArray.removeObject(at: indexPath.row)
+        self.tableView.reloadData()
+//        self.tableView.setEditing(false, animated: true)
+    }
+    
+    override func tableView(_ tableView: UITableView, didEndEditingRowAt indexPath: IndexPath?) {
 
+    }
+    
+    // MARK: private methods
+    private func _showInfoForCell(cell: todoItemsTableViewCell) {
+        let indexPath = self.tableView.indexPath(for: cell)
+    }
 }
+
 
 
