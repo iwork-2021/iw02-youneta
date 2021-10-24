@@ -11,7 +11,8 @@ import UIKit
 
 class rootTableViewController : UITableViewController {
     static var cellIdentifier : String = "todoItem"
-
+    private var cellModelArray = NSMutableArray.init()
+    
     override init(style: UITableView.Style) {
         super.init(style: style)
         self.title = "TODO List"
@@ -37,14 +38,31 @@ class rootTableViewController : UITableViewController {
         let addTodoBtn = UIButton.init(type: UIButton.ButtonType.custom)
         addTodoBtn.setTitle("Add", for: UIControl.State.normal)
         addTodoBtn.setTitleColor(UIColor.white, for: UIControl.State.normal)
-        addTodoBtn.addTarget(self, action: #selector(_handleAddTodoItem), for:UIControl.Event.touchUpInside);
+        addTodoBtn.addTarget(self, action: #selector(_handleClickAddTodoItem), for:UIControl.Event.touchUpInside);
         self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(customView: addTodoBtn)
         self.view.backgroundColor = UIColor.black
     }
 
-    @objc func _handleAddTodoItem(sender: UIBarButtonItem) {
-        let addNewVC = addNewTableViewController.init(style: UITableView.Style.plain)
+    @objc func _handleClickAddTodoItem(sender: UIBarButtonItem) {
+        let newItemModel = TodoItemModel()
+        let addNewVC = addNewTodoViewController.init(model: newItemModel)
         self.navigationController?.pushViewController(addNewVC, animated: true)
+//        self._handleAddTodoItem(model: newItemModel)
+    }
+    
+    func _handleAddTodoItem(model: TodoItemModel) {
+        let newCell = TodoItemTableViewCell.init(style: UITableViewCell.CellStyle.default, reuseIdentifier: rootTableViewController.cellIdentifier)
+        var _indexPath = self.tableView.indexPathsForVisibleRows?.last
+        if(_indexPath == nil){
+            _indexPath = IndexPath.init(row: 0, section: 0)
+        }
+        else {
+            _indexPath?.row += 1
+        }
+        cellModelArray.insert(model, at: _indexPath!.row)
+        self.tableView.beginUpdates()
+        self.tableView.insertRows(at: [_indexPath!], with: UITableView.RowAnimation.left)
+        self.tableView.endUpdates()
     }
     
     // MARK: - Table view data source
@@ -56,7 +74,7 @@ class rootTableViewController : UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 5
+        return 0
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -68,6 +86,7 @@ class rootTableViewController : UITableViewController {
         return cell
     }
 
+    
     /*
     // Override to support conditional editing of the table view.
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {

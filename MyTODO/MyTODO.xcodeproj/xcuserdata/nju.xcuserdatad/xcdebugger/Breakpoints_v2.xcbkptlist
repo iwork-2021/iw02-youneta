@@ -7,16 +7,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "66D829C7-C6D2-42C8-8AD4-BDBC584A4DF8"
+            uuid = "35D7D8D4-7428-4D07-9D94-8DA77834BD74"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "MyTODO/AppDelegate.swift"
+            filePath = "MyTODO/View/addNewItemTableViewCell.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "22"
-            endingLineNumber = "22"
-            landmarkName = "application(_:didFinishLaunchingWithOptions:)"
+            startingLineNumber = "85"
+            endingLineNumber = "85"
+            landmarkName = "_handleTapGes(sender:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
