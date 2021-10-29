@@ -10,13 +10,31 @@ import UIKit
 
 
 class rootTableViewController : UITableViewController {
+    //MARK: static
     static var cellIdentifier : String = "todoItem"
-    private var cellModelArray = NSMutableArray.init()
+    static var rowsNumberKey : String = "numberOfRows"
+    
+    private lazy var cellModelArray : NSMutableArray = {
+        var arr = NSMutableArray.init()
+        let defaults = UserDefaults.standard
+        let num : Int = defaults.integer(forKey: rootTableViewController.rowsNumberKey)
+        for i in 0..<num {
+            let modelParams = defaults.array(forKey: String(i))
+            if modelParams != nil {
+                var model = TodoItemModel.init(name: modelParams![0] as! String, date: modelParams![1] as! Date, check: modelParams![2] as! Bool, description: modelParams![3] as! String)
+                arr.addObjects(from: [model])
+            }
+        }
+        
+        
+        return arr
+    }()
     
     override init(style: UITableView.Style) {
         super.init(style: style)
         self.title = "TODO List"
         self.tableView.register(todoItemsTableViewCell.self, forCellReuseIdentifier: rootTableViewController.cellIdentifier)
+        
     }
     
     required init?(coder: NSCoder) {
@@ -26,10 +44,9 @@ class rootTableViewController : UITableViewController {
     //MARK: life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        self._setupTableView()
         self._setupAddNewBtn()
     }
-
+    
     //MARK: private methods
     private func _setupAddNewBtn() {
         let addTodoBtn = UIButton.init(type: UIButton.ButtonType.custom)
@@ -42,6 +59,7 @@ class rootTableViewController : UITableViewController {
     
     @objc func _handleClickAddTodoItem(sender: UIBarButtonItem) {
         let addNewVC = addNewTodoViewController.init()
+        addNewVC.title = "Add"
         weak var weakSelf = self
         addNewVC.completeBlk = {(model:TodoItemModel) -> () in
             if model.itemName != ""{
@@ -59,10 +77,15 @@ class rootTableViewController : UITableViewController {
         self.tableView.insertRows(at: [_indexPath], with: UITableView.RowAnimation.left)
         self.tableView.endUpdates()
         self.tableView.reloadData()
-    }
-    
-    private func _setupTableView() {
-
+        
+        //I/O操作异步执行
+        DispatchQueue.global().async {
+            let defaults = UserDefaults.standard
+            defaults.set(self.cellModelArray.count, forKey: rootTableViewController.rowsNumberKey)
+            let modelPropertyArray = NSArray.init(array: [model.itemName ?? "", model.date ?? Date.now, model.check ?? false, model.itemDescription ?? ""])
+            defaults.set(modelPropertyArray, forKey: String(_indexPath.row))
+            defaults.synchronize()
+        }
     }
     
     // MARK: - Table view data source
@@ -76,7 +99,6 @@ class rootTableViewController : UITableViewController {
         // #warning Incomplete implementation, return the number of rows
         return self.cellModelArray.count
     }
-
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let model: TodoItemModel = cellModelArray[indexPath.row] as! TodoItemModel
@@ -110,17 +132,35 @@ class rootTableViewController : UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         self.cellModelArray.removeObject(at: indexPath.row)
         self.tableView.reloadData()
-//        self.tableView.setEditing(false, animated: true)
+        DispatchQueue.global().async {
+            let defaults = UserDefaults.standard
+            defaults.removeObject(forKey: String(indexPath.row))
+        }
     }
     
     override func tableView(_ tableView: UITableView, didEndEditingRowAt indexPath: IndexPath?) {
-
     }
     
     // MARK: private methods
     private func _showInfoForCell(cell: todoItemsTableViewCell) {
         let indexPath = self.tableView.indexPath(for: cell)
+        let currentCellModel = self.cellModelArray[indexPath?.row ?? 0]
+        let editVC = addNewTodoViewController.init(model: currentCellModel as! TodoItemModel)
+        editVC.title = "Edit"
+        editVC.completeBlk = {(model:TodoItemModel) -> () in
+            self.cellModelArray.replaceObject(at: indexPath?.row ?? 0, with: model)
+            self.tableView.reloadData()
+            DispatchQueue.global().async {
+                let defaults = UserDefaults.standard
+                let modelPropertyArray = NSArray.init(array: [model.itemName ?? "", model.date ?? Date.now, model.check ?? false, model.itemDescription ?? ""])
+                defaults.set(modelPropertyArray, forKey: String(indexPath?.row ?? 0))
+                defaults.synchronize()
+            }
+            
+        }
+        self.navigationController?.pushViewController(editVC, animated: true)
     }
+
 }
 
 

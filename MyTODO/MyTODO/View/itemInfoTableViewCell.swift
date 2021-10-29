@@ -19,6 +19,7 @@ typealias voidBlk = () -> ()
 class itemInfoTableViewCell: UITableViewCell {
     static let moreActionImageName : String = "moreAction"
     
+    //MARK: properties
     var didClickCellBlk : voidBlk?
     var textFieldDefaultText : String? {
         didSet {
@@ -27,7 +28,11 @@ class itemInfoTableViewCell: UITableViewCell {
             }
         }
     }
-    lazy var iconImageView : UIImageView = UIImageView()
+    lazy var iconImageView : UIImageView = {
+        var imageView = UIImageView.init()
+        imageView.contentMode = .scaleToFill
+        return imageView
+    }()
     lazy var nameLabel : UILabel = UILabel()
     lazy var detailTextField : UITextField = {
         var textField = UITextField()
@@ -54,7 +59,14 @@ class itemInfoTableViewCell: UITableViewCell {
         self.iconImageView.image = UIImage.init(named: iconImageName)
         self.cellType = type
     }
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
     
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        // Initialization code
+    }
     //MARK: life cycle
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -85,6 +97,12 @@ class itemInfoTableViewCell: UITableViewCell {
     
     //MARK: setupUI
     private func _setupUI() {
+//        let itemSize = CGSize(width: 15, height: 15)
+//        UIGraphicsBeginImageContext(itemSize)
+//        let itemRect = CGRect(x: 0, y: 0, width: itemSize.width, height: itemSize.height)
+//        self.iconImageView.image?.draw(in: itemRect)
+//        self.iconImageView.image = UIGraphicsGetImageFromCurrentImageContext()
+//        UIGraphicsEndImageContext()
         self._setupContraints()
     }
     
@@ -138,19 +156,9 @@ class itemInfoTableViewCell: UITableViewCell {
         }
     }
     
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-    }
-    
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
-    }
-    
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state
     }
-
 }

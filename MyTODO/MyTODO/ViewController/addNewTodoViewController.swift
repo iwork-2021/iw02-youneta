@@ -12,9 +12,28 @@ typealias completionBlk = (TodoItemModel) -> ()
 class addNewTodoViewController: UIViewController {
     
     private lazy var model:TodoItemModel = TodoItemModel()
-    private lazy var _addNewTodoView:todoItemInfoView = todoItemInfoView.init(frame: CGRect.zero)
+    private lazy var _addNewTodoView:todoItemInfoView = todoItemInfoView.init()
     var completeBlk: completionBlk? = nil
 
+    
+    //MARK: init
+    
+    init(model: TodoItemModel) {
+        super.init(nibName: nil, bundle: nil)
+        self.model = model
+        self._addNewTodoView = todoItemInfoView.init(name: self.model.itemName ?? "", date: self.model.date ?? Date.now, checked: self.model.check ?? false, description: self.model.itemDescription ?? "")
+    }
+    
+    init() {
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+    
+    
+    
     //MARK: life cycle
     
     override func viewDidLoad() {
@@ -61,6 +80,7 @@ class addNewTodoViewController: UIViewController {
         self.model.date = self._addNewTodoView.getDate()
         self.model.itemDescription = self._addNewTodoView.getDecription()
         self.model.itemName = self._addNewTodoView.getNameText()
+        //注意闭包判空
         if(self.completeBlk == nil) {
         }
         else {
@@ -69,15 +89,4 @@ class addNewTodoViewController: UIViewController {
         self.navigationController?.popViewController(animated: true)
 
     }
-    
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

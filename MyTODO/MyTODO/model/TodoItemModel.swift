@@ -16,4 +16,11 @@ class TodoItemModel: NSObject {
     override init() {
         super.init()
     }
+    
+    init(name: String, date: Date, check: Bool, description: String) {
+        self.itemName = name
+        self.date = date
+        self.check = check
+        self.itemDescription = description
+    }
 }

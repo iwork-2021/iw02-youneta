@@ -11,9 +11,17 @@ typealias tapInfoBlk = (todoItemsTableViewCell) -> ()
 class todoItemsTableViewCell: UITableViewCell {
 
     lazy var nameLabel : UILabel = UILabel()
-    lazy var circleImageView : UIImageView = UIImageView()
+    lazy var circleImageView : UIImageView = {
+        var imageView = UIImageView.init()
+        imageView.contentMode = .scaleToFill
+        return imageView
+    }()
     lazy var correctImageView : UIImageView = UIImageView()
-    lazy var infoImageView : UIImageView = UIImageView()
+    lazy var infoImageView : UIImageView = {
+        var imageView = UIImageView.init()
+        imageView.contentMode = .scaleToFill
+        return imageView
+    }()
     var didTapInfoBlk : tapInfoBlk? = nil
     
     //MARK: initializer
